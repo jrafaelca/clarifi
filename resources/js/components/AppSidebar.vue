@@ -7,6 +7,7 @@ import {
     LayoutGrid,
     MessageSquare,
     PiggyBank,
+    Settings,
     Target,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -29,6 +30,7 @@ import { index as chat } from '@/routes/chat';
 import { index as debts } from '@/routes/debts';
 import { index as goals } from '@/routes/goals';
 import { index as transactions } from '@/routes/transactions';
+import { edit as editWorkspace } from '@/routes/workspace';
 import type { NavItem } from '@/types';
 
 const page = usePage();
@@ -73,6 +75,11 @@ const mainNavItems = computed<NavItem[]>(() => [
         title: 'Asistente',
         href: currentTeam.value ? chat({ current_team: currentTeam.value.slug }).url : '#',
         icon: MessageSquare,
+    },
+    {
+        title: 'Ajustes',
+        href: editWorkspace().url,
+        icon: Settings,
     },
 ]);
 </script>

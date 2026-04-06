@@ -8,9 +8,14 @@ import { toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editProfile } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
+import { edit as editWorkspace } from '@/routes/workspace';
 import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
+    {
+        title: 'Espacio de trabajo',
+        href: editWorkspace(),
+    },
     {
         title: 'Perfil',
         href: editProfile(),
@@ -32,7 +37,7 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
     <div class="px-4 py-6">
         <Heading
             title="Ajustes"
-            description="Administra tu perfil y la configuracion de tu cuenta"
+            description="Administra tu espacio de trabajo, perfil y seguridad"
         />
 
         <div class="flex flex-col lg:flex-row lg:space-x-12">
