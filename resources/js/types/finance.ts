@@ -18,6 +18,52 @@ export type ChatMessageRecord = {
     createdAt?: string | null;
 };
 
+export type AiWorkspaceSettings = {
+    configured: boolean;
+    provider: string;
+    model: string;
+    keyLast4?: string | null;
+};
+
+export type IngestionFileRecord = {
+    id: number;
+    name: string;
+    mimeType: string;
+    sizeBytes: number;
+};
+
+export type IngestionSuggestionRecord = {
+    id: number;
+    key: string;
+    kind: 'account' | 'category' | 'transaction';
+    status: 'draft' | 'approved' | 'rejected';
+    confidence?: string | number | null;
+    sourceExcerpt?: string | null;
+    payload: Record<string, unknown>;
+    materializedModelType?: string | null;
+    materializedModelId?: number | null;
+    approvedAt?: string | null;
+    rejectedAt?: string | null;
+};
+
+export type IngestionBatchRecord = {
+    id: number;
+    conversationId?: string | null;
+    status: 'processing' | 'draft' | 'partially_confirmed' | 'confirmed' | 'rejected' | 'failed';
+    sourceKind: string;
+    summary?: string | null;
+    errorMessage?: string | null;
+    processedAt?: string | null;
+    createdAt?: string | null;
+    files: IngestionFileRecord[];
+    counts: {
+        draft: number;
+        approved: number;
+        rejected: number;
+    };
+    suggestions: IngestionSuggestionRecord[];
+};
+
 export type SelectOption = {
     value: string;
     label: string;

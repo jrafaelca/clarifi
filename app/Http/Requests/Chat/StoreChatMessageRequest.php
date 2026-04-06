@@ -16,7 +16,13 @@ class StoreChatMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'prompt' => ['required', 'string', 'max:4000'],
+            'prompt' => ['required_without:attachments', 'nullable', 'string', 'max:4000'],
+            'attachments' => ['required_without:prompt', 'array', 'max:5'],
+            'attachments.*' => [
+                'file',
+                'max:10240',
+                'mimetypes:image/jpeg,image/png,image/webp,application/pdf,text/csv,text/plain,application/csv,application/vnd.ms-excel',
+            ],
             'conversation_id' => [
                 'nullable',
                 'string',

@@ -5,10 +5,14 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 test('chat answers are returned and persisted in a remembered conversation', function () {
-    config()->set('ai.providers.openai.key', 'test-key');
-
     $user = User::factory()->create();
     $team = $user->currentTeam;
+    $team->forceFill([
+        'openai_api_key_encrypted' => 'test-key',
+        'openai_api_key_last4' => 'tkey',
+        'ai_provider' => 'openai',
+        'ai_model' => 'gpt-4.1-mini',
+    ])->save();
 
     FinanceAssistantAgent::fake(['You are within budget this month.']);
 
@@ -29,10 +33,14 @@ test('chat answers are returned and persisted in a remembered conversation', fun
 });
 
 test('users can not continue another users conversation', function () {
-    config()->set('ai.providers.openai.key', 'test-key');
-
     $foreignUser = User::factory()->create();
     $foreignTeam = $foreignUser->currentTeam;
+    $foreignTeam->forceFill([
+        'openai_api_key_encrypted' => 'foreign-test-key',
+        'openai_api_key_last4' => 'tkey',
+        'ai_provider' => 'openai',
+        'ai_model' => 'gpt-4.1-mini',
+    ])->save();
 
     FinanceAssistantAgent::fake(['First response.']);
 
@@ -48,6 +56,12 @@ test('users can not continue another users conversation', function () {
 
     $user = User::factory()->create();
     $team = $user->currentTeam;
+    $team->forceFill([
+        'openai_api_key_encrypted' => 'local-test-key',
+        'openai_api_key_last4' => 'tkey',
+        'ai_provider' => 'openai',
+        'ai_model' => 'gpt-4.1-mini',
+    ])->save();
 
     $response = $this->actingAs($user)->postJson(route('chat.messages.store', [
         'current_team' => $team->slug,
@@ -57,4 +71,17 @@ test('users can not continue another users conversation', function () {
     ]);
 
     $response->assertStatus(422)->assertJsonValidationErrors('conversation_id');
+});
+
+test('chat is blocked when the current workspace has no ai configuration', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson(route('chat.messages.store', [
+            'current_team' => $user->currentTeam->slug,
+        ]), [
+            'prompt' => 'How am I doing this month?',
+        ])
+        ->assertStatus(503)
+        ->assertJsonPath('message', 'La IA todavia no esta configurada para este espacio de trabajo.');
 });

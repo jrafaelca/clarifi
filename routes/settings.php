@@ -22,6 +22,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('settings/security', [SecurityController::class, 'edit'])->name('security.edit');
     Route::get('settings/workspace', [WorkspaceController::class, 'edit'])->name('workspace.edit');
     Route::patch('settings/workspace', [WorkspaceController::class, 'update'])->name('workspace.update');
+    Route::patch('settings/workspace/ai', [WorkspaceController::class, 'updateAi'])->name('workspace.ai.update');
+    Route::delete('settings/workspace/ai', [WorkspaceController::class, 'destroyAi'])->name('workspace.ai.destroy');
 
     Route::put('settings/password', [SecurityController::class, 'update'])
         ->middleware('throttle:6,1')

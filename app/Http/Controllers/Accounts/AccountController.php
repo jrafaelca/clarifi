@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Accounts;
 
+use App\Application\Accounts\CreateAccount;
 use App\Application\Transactions\RecalculateAccountBalance;
 use App\Domain\Accounts\Enums\AccountType;
 use App\Domain\Accounts\Models\Account;
@@ -57,25 +58,20 @@ class AccountController extends Controller
     /**
      * Store a newly created account.
      */
-    public function store(SaveAccountRequest $request, RecalculateAccountBalance $recalculateAccountBalance): RedirectResponse
+    public function store(SaveAccountRequest $request, CreateAccount $createAccount): RedirectResponse
     {
         Gate::authorize('create', Account::class);
 
         $team = $request->user()->currentTeam()->firstOrFail();
         $validated = $request->validated();
 
-        $account = Account::create([
-            'team_id' => $team->id,
+        $createAccount->handle($team, [
             'name' => $validated['name'],
             'type' => $validated['type'],
-            'currency' => $team->currency,
             'initial_balance' => $validated['initial_balance'],
-            'current_balance' => $validated['initial_balance'],
             'institution' => $validated['institution'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
         ]);
-
-        $recalculateAccountBalance->handle($account);
 
         return back();
     }

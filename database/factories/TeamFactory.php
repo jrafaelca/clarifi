@@ -25,6 +25,10 @@ class TeamFactory extends Factory
             'slug' => Str::slug($name),
             'currency' => config('clarifi.default_currency'),
             'is_personal' => false,
+            'openai_api_key_encrypted' => null,
+            'openai_api_key_last4' => null,
+            'ai_provider' => 'openai',
+            'ai_model' => 'gpt-4.1-mini',
         ];
     }
 

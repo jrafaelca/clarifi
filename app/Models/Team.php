@@ -10,15 +10,27 @@ use App\Domain\Debts\Models\Debt;
 use App\Domain\Goals\Models\Goal;
 use App\Domain\Transactions\Models\Transaction;
 use App\Enums\TeamRole;
+use App\Models\Ai\IngestionBatch;
 use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'slug', 'currency', 'is_personal'])]
+#[Fillable([
+    'name',
+    'slug',
+    'currency',
+    'is_personal',
+    'openai_api_key_encrypted',
+    'openai_api_key_last4',
+    'ai_provider',
+    'ai_model',
+])]
+#[Hidden(['openai_api_key_encrypted'])]
 class Team extends Model
 {
     /** @use HasFactory<TeamFactory> */
@@ -148,6 +160,25 @@ class Team extends Model
     }
 
     /**
+     * Get the ingestion batches for the team.
+     *
+     * @return HasMany<IngestionBatch, $this>
+     */
+    public function ingestionBatches(): HasMany
+    {
+        return $this->hasMany(IngestionBatch::class);
+    }
+
+    /**
+     * Determine whether the team has AI configured.
+     */
+    public function hasAiConfiguration(): bool
+    {
+        return filled($this->openai_api_key_encrypted)
+            && $this->ai_provider === 'openai';
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -156,6 +187,7 @@ class Team extends Model
     {
         return [
             'is_personal' => 'boolean',
+            'openai_api_key_encrypted' => 'encrypted',
         ];
     }
 

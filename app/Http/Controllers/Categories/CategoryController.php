@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Categories;
 
+use App\Application\Categories\CreateCategory;
 use App\Domain\Categories\Enums\CategoryType;
 use App\Domain\Categories\Models\Category;
 use App\Http\Controllers\Controller;
@@ -60,21 +61,19 @@ class CategoryController extends Controller
     /**
      * Store a newly created category.
      */
-    public function store(SaveCategoryRequest $request): RedirectResponse
+    public function store(SaveCategoryRequest $request, CreateCategory $createCategory): RedirectResponse
     {
         Gate::authorize('create', Category::class);
 
         $team = $request->user()->currentTeam()->firstOrFail();
         $validated = $request->validated();
 
-        Category::create([
-            'team_id' => $team->id,
+        $createCategory->handle($team, [
             'name' => $validated['name'],
             'type' => $validated['type'],
             'parent_id' => $validated['parent_id'] ?? null,
             'icon' => $validated['icon'] ?? null,
             'color' => $validated['color'] ?? null,
-            'is_system' => false,
         ]);
 
         return back();
