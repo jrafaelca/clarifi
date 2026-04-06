@@ -64,22 +64,22 @@ defineOptions({
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <MetricCard
                 title="Total balance"
-                :value="new Intl.NumberFormat(undefined, { style: 'currency', currency: workspace.currency }).format(Number(metrics.totalBalance))"
+                :value="new Intl.NumberFormat('es-CL', { style: 'currency', currency: workspace.currency }).format(Number(metrics.totalBalance))"
                 description="Across active accounts"
             />
             <MetricCard
                 title="Income this month"
-                :value="new Intl.NumberFormat(undefined, { style: 'currency', currency: workspace.currency }).format(Number(metrics.incomeThisMonth))"
+                :value="new Intl.NumberFormat('es-CL', { style: 'currency', currency: workspace.currency }).format(Number(metrics.incomeThisMonth))"
                 description="Confirmed income entries"
             />
             <MetricCard
                 title="Expenses this month"
-                :value="new Intl.NumberFormat(undefined, { style: 'currency', currency: workspace.currency }).format(Number(metrics.expensesThisMonth))"
+                :value="new Intl.NumberFormat('es-CL', { style: 'currency', currency: workspace.currency }).format(Number(metrics.expensesThisMonth))"
                 description="Confirmed expense entries"
             />
             <MetricCard
                 title="Budget remaining"
-                :value="new Intl.NumberFormat(undefined, { style: 'currency', currency: workspace.currency }).format(Number(metrics.budgetRemaining))"
+                :value="new Intl.NumberFormat('es-CL', { style: 'currency', currency: workspace.currency }).format(Number(metrics.budgetRemaining))"
                 description="Current month budget status"
             />
         </div>

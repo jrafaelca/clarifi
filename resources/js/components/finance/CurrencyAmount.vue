@@ -9,7 +9,7 @@ type Props = {
 const props = defineProps<Props>();
 
 const formattedAmount = computed(() =>
-    new Intl.NumberFormat(undefined, {
+    new Intl.NumberFormat('es-CL', {
         style: 'currency',
         currency: props.currency,
         minimumFractionDigits: 2,
