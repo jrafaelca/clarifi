@@ -50,7 +50,7 @@ defineOptions({
     layout: (props: { team: Team }) => ({
         breadcrumbs: [
             {
-                title: 'Teams',
+                title: 'Equipos',
                 href: index(),
             },
             {
@@ -72,8 +72,8 @@ const invitationToCancel = ref<TeamInvitation | null>(null);
 
 const pageTitle = computed(() =>
     props.permissions.canUpdateTeam
-        ? `Edit ${props.team.name}`
-        : `View ${props.team.name}`,
+        ? `Editar ${props.team.name}`
+        : `Ver ${props.team.name}`,
 );
 
 const updateMemberRole = (member: TeamMember, newRole: string) => {
@@ -104,8 +104,8 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
         <div v-if="permissions.canUpdateTeam" class="space-y-6">
             <Heading
                 variant="small"
-                title="Team settings"
-                description="Update your team name and settings"
+                title="Configuracion del equipo"
+                description="Actualiza el nombre y la configuracion del equipo"
             />
 
             <Form
@@ -114,7 +114,7 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
                 v-slot="{ errors, processing, recentlySuccessful }"
             >
                 <div class="grid gap-2">
-                    <Label for="name">Team name</Label>
+                    <Label for="name">Nombre del equipo</Label>
                     <Input
                         id="name"
                         name="name"
@@ -131,7 +131,7 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
                         data-test="team-save-button"
                         :disabled="processing"
                     >
-                        Save
+                        Guardar
                     </Button>
 
                     <Transition
@@ -144,7 +144,7 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
                             v-show="recentlySuccessful"
                             class="text-sm text-neutral-600"
                         >
-                            Saved.
+                            Guardado.
                         </p>
                     </Transition>
                 </div>
@@ -160,10 +160,10 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
             <div class="flex items-center justify-between">
                 <Heading
                     variant="small"
-                    title="Team members"
+                    title="Miembros del equipo"
                     :description="
                         permissions.canCreateInvitation
-                            ? 'Manage who belongs to this team'
+                            ? 'Administra quien pertenece a este equipo'
                             : ''
                     "
                 />
@@ -173,7 +173,7 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
                     data-test="invite-member-button"
                     @click="inviteDialogOpen = true"
                 >
-                    <UserPlus /> Invite member
+                    <UserPlus /> Invitar miembro
                 </Button>
             </div>
 
@@ -256,13 +256,13 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
                                         @click="confirmRemoveMember(member)"
                                     >
                                         <X class="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Remove member</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Quitar miembro</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                     </div>
                 </div>
             </div>
@@ -272,8 +272,8 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
         <div v-if="invitations.length > 0" class="space-y-6">
             <Heading
                 variant="small"
-                title="Pending invitations"
-                description="Invitations that haven't been accepted yet"
+                title="Invitaciones pendientes"
+                description="Invitaciones que todavia no han sido aceptadas"
             />
 
             <div class="space-y-3">
@@ -312,7 +312,7 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Cancel invitation</p>
+                                <p>Cancelar invitacion</p>
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
@@ -327,8 +327,8 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
         >
             <Heading
                 variant="small"
-                title="Delete team"
-                description="Permanently delete your team"
+                title="Eliminar equipo"
+                description="Elimina tu equipo de forma permanente"
             />
             <div
                 class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10"
@@ -336,16 +336,16 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
                 <div
                     class="relative space-y-0.5 text-red-600 dark:text-red-100"
                 >
-                    <p class="font-medium">Warning</p>
+                    <p class="font-medium">Advertencia</p>
                     <p class="text-sm">
-                        Please proceed with caution, this cannot be undone.
+                        Procede con cuidado, esta accion no se puede deshacer.
                     </p>
                 </div>
                 <Button
                     data-test="delete-team-button"
                     variant="destructive"
                     @click="deleteDialogOpen = true"
-                    >Delete team</Button
+                    >Eliminar equipo</Button
                 >
             </div>
         </div>

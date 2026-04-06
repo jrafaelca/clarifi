@@ -66,7 +66,7 @@ class DebtController extends Controller
                     'interestRate' => $debt->interest_rate,
                     'minimumPayment' => $debt->minimum_payment,
                     'dueDate' => $debt->due_date?->toDateString(),
-                    'status' => $debt->status->value,
+                    'status' => $debt->status->label(),
                     'notes' => $debt->notes,
                     'payments' => $debt->payments
                         ->sortByDesc('paid_on')

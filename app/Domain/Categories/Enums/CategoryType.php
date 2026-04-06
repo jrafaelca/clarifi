@@ -13,8 +13,8 @@ enum CategoryType: string
     public function label(): string
     {
         return match ($this) {
-            self::Income => 'Income',
-            self::Expense => 'Expense',
+            self::Income => 'Ingreso',
+            self::Expense => 'Gasto',
         };
     }
 

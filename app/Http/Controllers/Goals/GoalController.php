@@ -49,7 +49,7 @@ class GoalController extends Controller
                     'currency' => $goal->currency,
                     'targetDate' => $goal->target_date?->toDateString(),
                     'notes' => $goal->notes,
-                    'status' => $goal->status->value,
+                    'status' => $goal->status->label(),
                     'contributions' => $goal->contributions
                         ->sortByDesc('contributed_on')
                         ->values()

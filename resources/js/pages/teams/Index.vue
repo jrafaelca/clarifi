@@ -24,7 +24,7 @@ defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: 'Teams',
+                title: 'Equipos',
                 href: index(),
             },
         ],
@@ -33,21 +33,21 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Teams" />
+    <Head title="Equipos" />
 
-    <h1 class="sr-only">Teams</h1>
+    <h1 class="sr-only">Equipos</h1>
 
     <div class="flex flex-col space-y-6">
         <div class="flex items-center justify-between">
             <Heading
                 variant="small"
-                title="Teams"
-                description="Manage your teams and team memberships"
+                title="Equipos"
+                description="Administra tus equipos y membresias"
             />
 
             <CreateTeamModal>
                 <Button data-test="teams-new-team-button">
-                    <Plus /> New team
+                    <Plus /> Nuevo equipo
                 </Button>
             </CreateTeamModal>
         </div>
@@ -89,7 +89,7 @@ defineOptions({
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>View team</p>
+                                <p>Ver equipo</p>
                             </TooltipContent>
                         </Tooltip>
 
@@ -107,7 +107,7 @@ defineOptions({
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Edit team</p>
+                                <p>Editar equipo</p>
                             </TooltipContent>
                         </Tooltip>
                     </div>
@@ -118,7 +118,7 @@ defineOptions({
                 v-if="teams.length === 0"
                 class="py-8 text-center text-muted-foreground"
             >
-                You don't belong to any teams yet.
+                Aun no perteneces a ningun equipo.
             </p>
         </div>
     </div>

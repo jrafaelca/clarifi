@@ -37,7 +37,7 @@ defineOptions({
     layout: (page: { currentTeam?: Team | null }) => ({
         breadcrumbs: [
             {
-                title: 'Budgets',
+                title: 'Presupuestos',
                 href: page.currentTeam ? index({ current_team: page.currentTeam.slug }) : '/',
             },
         ],
@@ -46,20 +46,20 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Budgets" />
+    <Head title="Presupuestos" />
 
     <div class="space-y-6 px-4 py-6">
         <Heading
-            title="Budgets"
-            description="Compare planned spending against real expenses by category"
+            title="Presupuestos"
+            description="Compara el gasto planificado contra los gastos reales por categoria"
         />
 
         <div class="grid gap-6 xl:grid-cols-[360px_1fr]">
             <Card class="h-fit">
                 <CardHeader>
-                    <CardTitle>Set monthly budget</CardTitle>
+                    <CardTitle>Definir presupuesto mensual</CardTitle>
                     <CardDescription>
-                        Budgets are tracked per expense category and month.
+                        Los presupuestos se siguen por categoria de gasto y por mes.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -69,9 +69,9 @@ defineOptions({
                         v-slot="{ errors, processing }"
                     >
                         <div class="grid gap-2">
-                            <Label for="budget-category">Category</Label>
+                            <Label for="budget-category">Categoria</Label>
                             <select id="budget-category" name="category_id" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                <option value="" disabled selected>Select category</option>
+                                <option value="" disabled selected>Selecciona una categoria</option>
                                 <option v-for="category in categories" :key="category.id" :value="category.id">
                                     {{ category.name }}
                                 </option>
@@ -81,19 +81,19 @@ defineOptions({
 
                         <div class="grid gap-3 md:grid-cols-2">
                             <div class="grid gap-2">
-                                <Label for="budget-month">Month</Label>
+                                <Label for="budget-month">Mes</Label>
                                 <Input id="budget-month" type="month" name="month" :default-value="month" />
                                 <InputError :message="errors.month" />
                             </div>
 
                             <div class="grid gap-2">
-                                <Label for="budget-amount">Amount</Label>
+                                <Label for="budget-amount">Monto</Label>
                                 <Input id="budget-amount" type="number" name="amount" step="0.01" placeholder="0.00" />
                                 <InputError :message="errors.amount" />
                             </div>
                         </div>
 
-                        <Button :disabled="processing" class="w-full">Save budget</Button>
+                        <Button :disabled="processing" class="w-full">Guardar presupuesto</Button>
                     </Form>
                 </CardContent>
             </Card>
@@ -103,9 +103,9 @@ defineOptions({
                     <CardHeader>
                         <CardTitle>{{ status.month }}</CardTitle>
                         <CardDescription>
-                            Budgeted
+                            Presupuestado
                             <CurrencyAmount :amount="status.totals.budgeted" :currency="status.currency" />
-                            · Spent
+                            · Gastado
                             <CurrencyAmount :amount="status.totals.spent" :currency="status.currency" />
                         </CardDescription>
                     </CardHeader>
@@ -119,22 +119,22 @@ defineOptions({
                                 <div>
                                     <p class="font-medium">{{ budget.category.name }}</p>
                                     <p class="text-sm text-muted-foreground">
-                                        Remaining
+                                        Disponible
                                         <CurrencyAmount :amount="budget.remaining" :currency="status.currency" />
                                     </p>
                                 </div>
                                 <Badge :variant="budget.isOverBudget ? 'destructive' : 'secondary'">
-                                    {{ budget.isOverBudget ? 'Over budget' : 'On track' }}
+                                    {{ budget.isOverBudget ? 'Sobre presupuesto' : 'En linea' }}
                                 </Badge>
                             </div>
 
                             <div class="mt-3 grid gap-3 md:grid-cols-2">
                                 <div class="rounded-md bg-muted/40 p-3 text-sm">
-                                    Budget:
+                                    Presupuesto:
                                     <CurrencyAmount :amount="budget.amount" :currency="status.currency" />
                                 </div>
                                 <div class="rounded-md bg-muted/40 p-3 text-sm">
-                                    Spent:
+                                    Gastado:
                                     <CurrencyAmount :amount="budget.spent" :currency="status.currency" />
                                 </div>
                             </div>
@@ -154,14 +154,14 @@ defineOptions({
 
                                 <Input type="number" name="amount" step="0.01" :default-value="budget.amount" />
 
-                                <Button :disabled="processing" size="sm">Update</Button>
+                                <Button :disabled="processing" size="sm">Actualizar</Button>
 
                                 <InputError class="md:col-span-3" :message="errors.amount || errors.category_id || errors.month" />
                             </Form>
                         </div>
 
                         <p v-if="status.items.length === 0" class="py-8 text-center text-sm text-muted-foreground">
-                            No budgets defined for this month yet.
+                            Aun no hay presupuestos definidos para este mes.
                         </p>
                     </CardContent>
                 </Card>

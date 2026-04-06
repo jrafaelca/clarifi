@@ -85,7 +85,7 @@ const sendPrompt = async () => {
             fieldErrors.value = {
                 prompt: payload.errors?.prompt?.[0],
             };
-            errorMessage.value = payload.message ?? 'The assistant could not answer right now.';
+            errorMessage.value = payload.message ?? 'El asistente no pudo responder en este momento.';
 
             return;
         }
@@ -101,7 +101,7 @@ const sendPrompt = async () => {
         conversationId.value = payload.conversationId ?? null;
         prompt.value = '';
     } catch {
-        errorMessage.value = 'A network error interrupted the assistant response.';
+        errorMessage.value = 'Un error de red interrumpio la respuesta del asistente.';
     } finally {
         isSending.value = false;
     }
@@ -111,7 +111,7 @@ defineOptions({
     layout: (page: { currentTeam?: Team | null }) => ({
         breadcrumbs: [
             {
-                title: 'Chat',
+                title: 'Asistente',
                 href: page.currentTeam ? index({ current_team: page.currentTeam.slug }) : '/',
             },
         ],
@@ -120,12 +120,12 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Chat" />
+    <Head title="Asistente" />
 
     <div class="space-y-6 px-4 py-6">
         <Heading
-            title="Finance assistant"
-            description="Read-only conversational layer over your real financial data"
+            title="Asistente financiero"
+            description="Capa conversacional de solo lectura sobre tus datos financieros reales"
         />
 
         <div class="grid gap-6 xl:grid-cols-[320px_1fr]">
@@ -133,30 +133,30 @@ defineOptions({
                 <CardHeader>
                     <div class="flex items-center justify-between gap-3">
                         <div>
-                            <CardTitle>Workspace assistant</CardTitle>
+                            <CardTitle>Asistente del espacio</CardTitle>
                             <CardDescription>
                                 {{ workspace.name }} · {{ workspace.currency }}
                             </CardDescription>
                         </div>
                         <Badge :variant="providerConfigured ? 'secondary' : 'outline'">
-                            {{ providerConfigured ? 'Provider configured' : 'Provider not configured' }}
+                            {{ providerConfigured ? 'Proveedor configurado' : 'Proveedor sin configurar' }}
                         </Badge>
                     </div>
                 </CardHeader>
                 <CardContent class="space-y-4">
                     <div class="flex flex-wrap gap-2">
-                        <Badge variant="outline">Read-only</Badge>
-                        <Badge variant="outline">Real workspace data</Badge>
-                        <Badge variant="outline">Conversation memory</Badge>
+                        <Badge variant="outline">Solo lectura</Badge>
+                        <Badge variant="outline">Datos reales del espacio</Badge>
+                        <Badge variant="outline">Memoria conversacional</Badge>
                     </div>
 
                     <p class="text-sm text-muted-foreground">
-                        Ask about balances, recent movements, budgets, goals, or debts. The assistant can inspect your real data but it will not write or confirm changes yet.
+                        Pregunta por saldos, movimientos recientes, presupuestos, metas o deudas. El asistente puede inspeccionar tus datos reales, pero todavia no escribira ni confirmara cambios.
                     </p>
 
                     <div class="space-y-2">
                         <p class="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                            Suggested prompts
+                            Sugerencias
                         </p>
                         <div class="flex flex-wrap gap-2">
                             <Button
@@ -177,9 +177,9 @@ defineOptions({
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Conversation</CardTitle>
+                    <CardTitle>Conversacion</CardTitle>
                     <CardDescription>
-                        Your current workspace thread stays grounded in ClariFi data and remains safe by default.
+                        Tu hilo actual del espacio se mantiene anclado en datos de ClariFi y seguro por defecto.
                     </CardDescription>
                 </CardHeader>
                 <CardContent class="space-y-4">
@@ -200,7 +200,7 @@ defineOptions({
                                     "
                                 >
                                     <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] opacity-70">
-                                        <span>{{ message.role === 'user' ? 'You' : 'ClariFi' }}</span>
+                                        <span>{{ message.role === 'user' ? 'Tu' : 'ClariFi' }}</span>
                                         <span v-if="message.createdAt">{{ message.createdAt }}</span>
                                     </div>
                                     <p class="whitespace-pre-wrap leading-6">
@@ -226,7 +226,7 @@ defineOptions({
                             v-else
                             class="flex min-h-[320px] items-center justify-center rounded-xl border border-dashed text-center text-sm text-muted-foreground"
                         >
-                            Start with a question about your current finances and ClariFi will answer from the data already in your workspace.
+                            Comienza con una pregunta sobre tus finanzas actuales y ClariFi respondera con los datos que ya existen en tu espacio.
                         </div>
                     </div>
 
@@ -239,13 +239,13 @@ defineOptions({
                         </div>
 
                         <label class="grid gap-2">
-                            <span class="text-sm font-medium">Message</span>
+                            <span class="text-sm font-medium">Mensaje</span>
                             <textarea
                                 v-model="prompt"
                                 rows="4"
                                 class="block w-full rounded-xl border border-input bg-background px-3 py-3 text-sm"
                                 :disabled="!providerConfigured || isSending"
-                                placeholder="How am I doing this month?"
+                                placeholder="Como voy este mes?"
                             />
                             <p
                                 v-if="fieldErrors.prompt"
@@ -257,14 +257,14 @@ defineOptions({
 
                         <div class="flex items-center justify-between gap-3">
                             <p class="text-xs text-muted-foreground">
-                                The assistant will stay read-only even if you ask it to create or edit records.
+                                El asistente seguira en modo solo lectura aunque le pidas crear o editar registros.
                             </p>
                             <Button
                                 type="button"
                                 :disabled="!providerConfigured || isSending || !prompt.trim()"
                                 @click="sendPrompt"
                             >
-                                {{ isSending ? 'Thinking...' : 'Send' }}
+                                {{ isSending ? 'Pensando...' : 'Enviar' }}
                             </Button>
                         </div>
                     </div>

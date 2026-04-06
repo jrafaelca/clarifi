@@ -15,10 +15,10 @@ enum AccountType: string
     public function label(): string
     {
         return match ($this) {
-            self::Cash => 'Cash',
-            self::Bank => 'Bank',
-            self::Savings => 'Savings',
-            self::CreditCard => 'Credit card',
+            self::Cash => 'Efectivo',
+            self::Bank => 'Banco',
+            self::Savings => 'Ahorros',
+            self::CreditCard => 'Tarjeta de credito',
         };
     }
 

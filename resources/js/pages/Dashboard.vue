@@ -44,7 +44,7 @@ defineOptions({
     layout: (page: { currentTeam?: { slug: string } | null }) => ({
         breadcrumbs: [
             {
-                title: 'Dashboard',
+                title: 'Resumen',
                 href: page.currentTeam ? dashboard(page.currentTeam.slug) : '/',
             },
         ],
@@ -53,43 +53,43 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head title="Resumen" />
 
     <div class="space-y-8 px-4 py-6">
         <Heading
-            title="Financial overview"
+            title="Resumen financiero"
             :description="`${workspace.name} · ${workspace.month}`"
         />
 
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-                title="Total balance"
+                title="Saldo total"
                 :value="new Intl.NumberFormat('es-CL', { style: 'currency', currency: workspace.currency }).format(Number(metrics.totalBalance))"
-                description="Across active accounts"
+                description="En cuentas activas"
             />
             <MetricCard
-                title="Income this month"
+                title="Ingresos del mes"
                 :value="new Intl.NumberFormat('es-CL', { style: 'currency', currency: workspace.currency }).format(Number(metrics.incomeThisMonth))"
-                description="Confirmed income entries"
+                description="Ingresos confirmados"
             />
             <MetricCard
-                title="Expenses this month"
+                title="Gastos del mes"
                 :value="new Intl.NumberFormat('es-CL', { style: 'currency', currency: workspace.currency }).format(Number(metrics.expensesThisMonth))"
-                description="Confirmed expense entries"
+                description="Gastos confirmados"
             />
             <MetricCard
-                title="Budget remaining"
+                title="Presupuesto disponible"
                 :value="new Intl.NumberFormat('es-CL', { style: 'currency', currency: workspace.currency }).format(Number(metrics.budgetRemaining))"
-                description="Current month budget status"
+                description="Estado del presupuesto actual"
             />
         </div>
 
         <div class="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
             <Card>
                 <CardHeader>
-                    <CardTitle>Budget snapshot</CardTitle>
+                    <CardTitle>Estado del presupuesto</CardTitle>
                     <CardDescription>
-                        {{ budget.month }} · remaining
+                        {{ budget.month }} · disponible
                         <CurrencyAmount :amount="budget.totals.remaining" :currency="budget.currency" />
                     </CardDescription>
                 </CardHeader>
@@ -103,29 +103,29 @@ defineOptions({
                             <div>
                                 <p class="font-medium">{{ item.category.name }}</p>
                                 <p class="text-sm text-muted-foreground">
-                                    Spent
+                                    Gastado
                                     <CurrencyAmount :amount="item.spent" :currency="budget.currency" />
-                                    of
+                                    de
                                     <CurrencyAmount :amount="item.amount" :currency="budget.currency" />
                                 </p>
                             </div>
                             <Badge :variant="item.isOverBudget ? 'destructive' : 'secondary'">
-                                {{ item.isOverBudget ? 'Over budget' : 'On track' }}
+                                {{ item.isOverBudget ? 'Sobre presupuesto' : 'En linea' }}
                             </Badge>
                         </div>
                     </div>
 
                     <p v-if="budget.items.length === 0" class="text-sm text-muted-foreground">
-                        No budgets have been created for this month yet.
+                        Aun no hay presupuestos creados para este mes.
                     </p>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Latest activity</CardTitle>
+                    <CardTitle>Actividad reciente</CardTitle>
                     <CardDescription>
-                        Your most recent financial movements
+                        Tus ultimos movimientos financieros
                     </CardDescription>
                 </CardHeader>
                 <CardContent class="space-y-3">
@@ -160,7 +160,7 @@ defineOptions({
                     </div>
 
                     <p v-if="latestTransactions.length === 0" class="text-sm text-muted-foreground">
-                        No transactions yet for this workspace.
+                        Aun no hay movimientos en este espacio de trabajo.
                     </p>
                 </CardContent>
             </Card>
@@ -169,11 +169,11 @@ defineOptions({
         <div class="grid gap-6 lg:grid-cols-2">
             <Card>
                 <CardHeader>
-                    <CardTitle>Goals</CardTitle>
+                    <CardTitle>Metas</CardTitle>
                     <CardDescription>
-                        Saved
+                        Ahorrado
                         <CurrencyAmount :amount="metrics.goalProgress" :currency="workspace.currency" />
-                        of
+                        de
                         <CurrencyAmount :amount="metrics.goalTarget" :currency="workspace.currency" />
                     </CardDescription>
                 </CardHeader>
@@ -188,7 +188,7 @@ defineOptions({
                                 <p class="font-medium">{{ goal.name }}</p>
                                 <p class="text-sm text-muted-foreground">
                                     <CurrencyAmount :amount="goal.currentAmount" :currency="goal.currency" />
-                                    of
+                                    de
                                     <CurrencyAmount :amount="goal.targetAmount" :currency="goal.currency" />
                                 </p>
                             </div>
@@ -199,16 +199,16 @@ defineOptions({
                     </div>
 
                     <p v-if="goals.length === 0" class="text-sm text-muted-foreground">
-                        Create your first savings goal to start tracking progress.
+                        Crea tu primera meta de ahorro para comenzar a seguir tu progreso.
                     </p>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Debts</CardTitle>
+                    <CardTitle>Deudas</CardTitle>
                     <CardDescription>
-                        Outstanding balance
+                        Saldo pendiente
                         <CurrencyAmount :amount="metrics.debtBalance" :currency="workspace.currency" />
                     </CardDescription>
                 </CardHeader>
@@ -222,7 +222,7 @@ defineOptions({
                             <div>
                                 <p class="font-medium">{{ debt.name }}</p>
                                 <p class="text-sm text-muted-foreground">
-                                    Due {{ debt.dueDate ?? 'No due date' }}
+                                    Vence {{ debt.dueDate ?? 'Sin fecha' }}
                                 </p>
                             </div>
                             <div class="text-right">
@@ -230,7 +230,7 @@ defineOptions({
                                     <CurrencyAmount :amount="debt.currentBalance" :currency="debt.currency" />
                                 </p>
                                 <p class="text-xs text-muted-foreground">
-                                    Minimum
+                                    Minimo
                                     <CurrencyAmount :amount="debt.minimumPayment" :currency="debt.currency" />
                                 </p>
                             </div>
@@ -238,7 +238,7 @@ defineOptions({
                     </div>
 
                     <p v-if="debts.length === 0" class="text-sm text-muted-foreground">
-                        You do not have debts registered yet.
+                        Aun no tienes deudas registradas.
                     </p>
                 </CardContent>
             </Card>

@@ -123,7 +123,7 @@ class TransactionController extends Controller
             'transactionStatuses' => collect(TransactionStatus::cases())
                 ->map(fn (TransactionStatus $status) => [
                     'value' => $status->value,
-                    'label' => ucfirst($status->value),
+                    'label' => $status->label(),
                 ])
                 ->values(),
         ]);

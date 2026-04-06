@@ -33,11 +33,11 @@ class ChatController extends Controller
             'conversationId' => $conversationId,
             'messages' => $this->conversationMessages($conversationId, $user),
             'examplePrompts' => [
-                'How am I doing this month?',
-                'What are my latest transactions?',
-                'Which categories are over budget?',
-                'How much is left for my goals?',
-                'What debt should I focus on first?',
+                'Como voy este mes?',
+                'Cuales son mis ultimos movimientos?',
+                'Que categorias estan sobre presupuesto?',
+                'Cuanto me falta para mis metas?',
+                'En que deuda deberia enfocarme primero?',
             ],
         ]);
     }
@@ -49,7 +49,7 @@ class ChatController extends Controller
     {
         if (blank(config('ai.providers.openai.key'))) {
             return response()->json([
-                'message' => 'OPENAI_API_KEY is not configured for ClariFi yet.',
+                'message' => 'OPENAI_API_KEY todavia no esta configurada para ClariFi.',
             ], 503);
         }
 

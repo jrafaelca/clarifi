@@ -38,7 +38,7 @@ defineOptions({
     layout: (page: { currentTeam?: Team | null }) => ({
         breadcrumbs: [
             {
-                title: 'Accounts',
+                title: 'Cuentas',
                 href: page.currentTeam ? index({ current_team: page.currentTeam.slug }) : '/',
             },
         ],
@@ -47,20 +47,20 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Accounts" />
+    <Head title="Cuentas" />
 
     <div class="space-y-6 px-4 py-6">
         <Heading
-            title="Accounts"
-            description="Track where your money lives and keep balances aligned with your transactions"
+            title="Cuentas"
+            description="Visualiza donde esta tu dinero y mantén los saldos alineados con tus movimientos"
         />
 
         <div class="grid gap-6 xl:grid-cols-[360px_1fr]">
             <Card class="h-fit">
                 <CardHeader>
-                    <CardTitle>Create account</CardTitle>
+                    <CardTitle>Crear cuenta</CardTitle>
                     <CardDescription>
-                        All accounts operate in {{ workspace.currency }} for the MVP.
+                        Todas las cuentas operan en {{ workspace.currency }} en este MVP.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -70,15 +70,15 @@ defineOptions({
                         v-slot="{ errors, processing }"
                     >
                         <div class="grid gap-2">
-                            <Label for="account-name">Name</Label>
-                            <Input id="account-name" name="name" placeholder="Main checking" />
+                            <Label for="account-name">Nombre</Label>
+                            <Input id="account-name" name="name" placeholder="Cuenta principal" />
                             <InputError :message="errors.name" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="account-type">Type</Label>
+                            <Label for="account-type">Tipo</Label>
                             <select id="account-type" name="type" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                <option value="" disabled selected>Select a type</option>
+                                <option value="" disabled selected>Selecciona un tipo</option>
                                 <option v-for="type in accountTypes" :key="type.value" :value="type.value">
                                     {{ type.label }}
                                 </option>
@@ -87,18 +87,18 @@ defineOptions({
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="account-institution">Institution</Label>
-                            <Input id="account-institution" name="institution" placeholder="Bank or issuer" />
+                            <Label for="account-institution">Institucion</Label>
+                            <Input id="account-institution" name="institution" placeholder="Banco o emisor" />
                             <InputError :message="errors.institution" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="account-balance">Opening balance</Label>
+                            <Label for="account-balance">Saldo inicial</Label>
                             <Input id="account-balance" type="number" name="initial_balance" step="0.01" placeholder="0.00" />
                             <InputError :message="errors.initial_balance" />
                         </div>
 
-                        <Button :disabled="processing" class="w-full">Save account</Button>
+                        <Button :disabled="processing" class="w-full">Guardar cuenta</Button>
                     </Form>
                 </CardContent>
             </Card>
@@ -116,13 +116,13 @@ defineOptions({
                             </div>
 
                             <Badge :variant="account.isActive ? 'secondary' : 'outline'">
-                                {{ account.isActive ? 'Active' : 'Archived' }}
+                                {{ account.isActive ? 'Activa' : 'Archivada' }}
                             </Badge>
                         </div>
 
                         <div class="rounded-lg bg-muted/40 p-4">
                             <p class="text-xs uppercase tracking-wide text-muted-foreground">
-                                Current balance
+                                Saldo actual
                             </p>
                             <p class="mt-1 text-2xl font-semibold">
                                 <CurrencyAmount :amount="account.currentBalance" :currency="account.currency" />
@@ -138,13 +138,13 @@ defineOptions({
                         >
                             <div class="grid gap-3 md:grid-cols-2">
                                 <div class="grid gap-2">
-                                    <Label :for="`account-name-${account.id}`">Name</Label>
+                                    <Label :for="`account-name-${account.id}`">Nombre</Label>
                                     <Input :id="`account-name-${account.id}`" name="name" :default-value="account.name" />
                                     <InputError :message="errors.name" />
                                 </div>
 
                                 <div class="grid gap-2">
-                                    <Label :for="`account-type-${account.id}`">Type</Label>
+                                    <Label :for="`account-type-${account.id}`">Tipo</Label>
                                     <select
                                         :id="`account-type-${account.id}`"
                                         name="type"
@@ -161,7 +161,7 @@ defineOptions({
 
                             <div class="grid gap-3 md:grid-cols-2">
                                 <div class="grid gap-2">
-                                    <Label :for="`account-institution-${account.id}`">Institution</Label>
+                                    <Label :for="`account-institution-${account.id}`">Institucion</Label>
                                     <Input
                                         :id="`account-institution-${account.id}`"
                                         name="institution"
@@ -170,7 +170,7 @@ defineOptions({
                                 </div>
 
                                 <div class="grid gap-2">
-                                    <Label :for="`account-balance-${account.id}`">Opening balance</Label>
+                                    <Label :for="`account-balance-${account.id}`">Saldo inicial</Label>
                                     <Input
                                         :id="`account-balance-${account.id}`"
                                         type="number"
@@ -184,12 +184,12 @@ defineOptions({
 
                             <label class="flex items-center gap-2 text-sm text-muted-foreground">
                                 <input type="checkbox" name="is_active" value="1" :checked="account.isActive" />
-                                Keep this account active
+                                Mantener esta cuenta activa
                             </label>
 
                             <div class="flex flex-wrap gap-2">
                                 <Button :disabled="processing" size="sm">
-                                    Update
+                                    Actualizar
                                 </Button>
 
                                 <Link
@@ -199,7 +199,7 @@ defineOptions({
                                     as="button"
                                     class="inline-flex h-9 items-center justify-center rounded-md border px-3 text-sm font-medium"
                                 >
-                                    Archive
+                                    Archivar
                                 </Link>
 
                                 <Link
@@ -209,7 +209,7 @@ defineOptions({
                                     as="button"
                                     class="inline-flex h-9 items-center justify-center rounded-md border px-3 text-sm font-medium"
                                 >
-                                    Restore
+                                    Restaurar
                                 </Link>
                             </div>
                         </Form>
@@ -218,7 +218,7 @@ defineOptions({
 
                 <Card v-if="props.accounts.length === 0" class="md:col-span-2">
                     <CardContent class="py-10 text-center text-sm text-muted-foreground">
-                        Create your first account to begin tracking balances and transactions.
+                        Crea tu primera cuenta para comenzar a seguir saldos y movimientos.
                     </CardContent>
                 </Card>
             </div>

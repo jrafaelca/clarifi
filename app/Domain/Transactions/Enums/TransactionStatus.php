@@ -8,6 +8,17 @@ enum TransactionStatus: string
     case Pending = 'pending';
 
     /**
+     * Get the label for the transaction status.
+     */
+    public function label(): string
+    {
+        return match ($this) {
+            self::Confirmed => 'Confirmada',
+            self::Pending => 'Pendiente',
+        };
+    }
+
+    /**
      * Get the available values.
      *
      * @return array<int, string>

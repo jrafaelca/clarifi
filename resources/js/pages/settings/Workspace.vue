@@ -22,7 +22,7 @@ defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: 'Workspace',
+                title: 'Espacio de trabajo',
                 href: edit(),
             },
         ],
@@ -31,28 +31,28 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Workspace" />
+    <Head title="Espacio de trabajo" />
 
     <div class="space-y-6">
         <Heading
             variant="small"
-            title="Workspace"
-            description="Your current ClariFi workspace and operating currency"
+            title="Espacio de trabajo"
+            description="Tu espacio actual de ClariFi y su moneda operativa"
         />
 
         <Card>
             <CardHeader>
                 <CardTitle>{{ workspace.name }}</CardTitle>
                 <CardDescription>
-                    The MVP uses a single personal workspace with one operating
-                    currency.
+                    El MVP usa un unico espacio personal con una sola moneda
+                    operativa.
                 </CardDescription>
             </CardHeader>
             <CardContent class="space-y-4 text-sm">
                 <div class="flex items-center gap-2">
-                    <span class="font-medium">Mode</span>
+                    <span class="font-medium">Modo</span>
                     <Badge variant="secondary">
-                        {{ workspace.isPersonal ? 'Personal workspace' : 'Shared workspace' }}
+                        {{ workspace.isPersonal ? 'Espacio personal' : 'Espacio compartido' }}
                     </Badge>
                 </div>
 
@@ -66,7 +66,7 @@ defineOptions({
 
                     <div class="rounded-lg border p-4">
                         <p class="text-xs uppercase tracking-wide text-muted-foreground">
-                            Currency
+                            Moneda
                         </p>
                         <p class="mt-1 font-medium">{{ workspace.currency }}</p>
                     </div>

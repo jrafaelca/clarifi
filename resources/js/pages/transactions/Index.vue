@@ -87,7 +87,7 @@ defineOptions({
     layout: (page: { currentTeam?: Team | null }) => ({
         breadcrumbs: [
             {
-                title: 'Transactions',
+                title: 'Movimientos',
                 href: page.currentTeam ? index({ current_team: page.currentTeam.slug }) : '/',
             },
         ],
@@ -96,18 +96,18 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Transactions" />
+    <Head title="Movimientos" />
 
     <div class="space-y-6 px-4 py-6">
         <Heading
-            title="Transactions"
-            description="Capture income, expenses and transfers against your real accounts"
+            title="Movimientos"
+            description="Captura ingresos, gastos y transferencias contra tus cuentas reales"
         />
 
         <div class="grid gap-4 md:grid-cols-4">
             <Card>
                 <CardHeader>
-                    <CardDescription>Income</CardDescription>
+                    <CardDescription>Ingresos</CardDescription>
                     <CardTitle>
                         <CurrencyAmount :amount="summary.income" :currency="workspace.currency" />
                     </CardTitle>
@@ -115,7 +115,7 @@ defineOptions({
             </Card>
             <Card>
                 <CardHeader>
-                    <CardDescription>Expenses</CardDescription>
+                    <CardDescription>Gastos</CardDescription>
                     <CardTitle>
                         <CurrencyAmount :amount="summary.expenses" :currency="workspace.currency" />
                     </CardTitle>
@@ -123,7 +123,7 @@ defineOptions({
             </Card>
             <Card>
                 <CardHeader>
-                    <CardDescription>Net flow</CardDescription>
+                    <CardDescription>Flujo neto</CardDescription>
                     <CardTitle>
                         <CurrencyAmount :amount="summary.net" :currency="workspace.currency" />
                     </CardTitle>
@@ -131,7 +131,7 @@ defineOptions({
             </Card>
             <Card>
                 <CardHeader>
-                    <CardDescription>Movements</CardDescription>
+                    <CardDescription>Movimientos</CardDescription>
                     <CardTitle>{{ summary.count }}</CardTitle>
                 </CardHeader>
             </Card>
@@ -140,14 +140,14 @@ defineOptions({
         <div class="grid gap-6 xl:grid-cols-[420px_1fr]">
             <Card class="h-fit">
                 <CardHeader>
-                    <CardTitle>Register movement</CardTitle>
+                    <CardTitle>Registrar movimiento</CardTitle>
                     <CardDescription>
-                        Need to fine-tune classifications?
+                        Necesitas ajustar clasificaciones?
                         <a
                             :href="categoriesIndex({ current_team: currentTeam.slug }).url"
                             class="underline underline-offset-4"
                         >
-                            Manage categories
+                            Gestionar categorias
                         </a>
                     </CardDescription>
                 </CardHeader>
@@ -158,7 +158,7 @@ defineOptions({
                         v-slot="{ errors, processing }"
                     >
                         <div class="grid gap-2">
-                            <Label for="transaction-type">Type</Label>
+                            <Label for="transaction-type">Tipo</Label>
                             <select
                                 id="transaction-type"
                                 v-model="createForm.type"
@@ -174,9 +174,9 @@ defineOptions({
 
                         <div v-if="createForm.type === 'transfer'" class="grid gap-3 md:grid-cols-2">
                             <div class="grid gap-2">
-                                <Label for="source-account">Source account</Label>
+                                <Label for="source-account">Cuenta origen</Label>
                                 <select id="source-account" name="source_account_id" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                    <option value="" disabled selected>Select account</option>
+                                    <option value="" disabled selected>Selecciona una cuenta</option>
                                     <option v-for="account in accounts" :key="account.id" :value="account.id">
                                         {{ account.name }}
                                     </option>
@@ -185,9 +185,9 @@ defineOptions({
                             </div>
 
                             <div class="grid gap-2">
-                                <Label for="destination-account">Destination account</Label>
+                                <Label for="destination-account">Cuenta destino</Label>
                                 <select id="destination-account" name="destination_account_id" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                    <option value="" disabled selected>Select account</option>
+                                    <option value="" disabled selected>Selecciona una cuenta</option>
                                     <option v-for="account in accounts" :key="account.id" :value="account.id">
                                         {{ account.name }}
                                     </option>
@@ -197,9 +197,9 @@ defineOptions({
                         </div>
 
                         <div v-else class="grid gap-2">
-                            <Label for="transaction-account">Account</Label>
+                            <Label for="transaction-account">Cuenta</Label>
                             <select id="transaction-account" name="account_id" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                <option value="" disabled selected>Select account</option>
+                                <option value="" disabled selected>Selecciona una cuenta</option>
                                 <option v-for="account in accounts" :key="account.id" :value="account.id">
                                     {{ account.name }}
                                 </option>
@@ -208,9 +208,9 @@ defineOptions({
                         </div>
 
                         <div v-if="createForm.type !== 'transfer'" class="grid gap-2">
-                            <Label for="transaction-category">Category</Label>
+                            <Label for="transaction-category">Categoria</Label>
                             <select id="transaction-category" name="category_id" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                <option value="">Uncategorized</option>
+                                <option value="">Sin categoria</option>
                                 <option
                                     v-for="category in categories.filter((item) => item.type === createForm.type)"
                                     :key="category.id"
@@ -224,26 +224,26 @@ defineOptions({
 
                         <div class="grid gap-3 md:grid-cols-2">
                             <div class="grid gap-2">
-                                <Label for="transaction-amount">Amount</Label>
+                                <Label for="transaction-amount">Monto</Label>
                                 <Input id="transaction-amount" type="number" name="amount" step="0.01" placeholder="0.00" />
                                 <InputError :message="errors.amount" />
                             </div>
 
                             <div class="grid gap-2">
-                                <Label for="transaction-date">Date</Label>
+                                <Label for="transaction-date">Fecha</Label>
                                 <Input id="transaction-date" type="date" name="transaction_date" :default-value="new Date().toISOString().slice(0, 10)" />
                                 <InputError :message="errors.transaction_date" />
                             </div>
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="transaction-description">Description</Label>
-                            <Input id="transaction-description" name="description" placeholder="What happened?" />
+                            <Label for="transaction-description">Descripcion</Label>
+                            <Input id="transaction-description" name="description" placeholder="Que paso?" />
                             <InputError :message="errors.description" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="transaction-status">Status</Label>
+                            <Label for="transaction-status">Estado</Label>
                             <select id="transaction-status" name="status" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                                 <option v-for="status in transactionStatuses" :key="status.value" :value="status.value">
                                     {{ status.label }}
@@ -252,17 +252,17 @@ defineOptions({
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="transaction-notes">Notes</Label>
-                            <textarea id="transaction-notes" name="notes" rows="3" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Optional details"></textarea>
+                            <Label for="transaction-notes">Notas</Label>
+                            <textarea id="transaction-notes" name="notes" rows="3" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Detalles opcionales"></textarea>
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="transaction-attachment">Attachment</Label>
+                            <Label for="transaction-attachment">Adjunto</Label>
                             <input id="transaction-attachment" name="attachment" type="file" class="block w-full text-sm" />
                             <InputError :message="errors.attachment" />
                         </div>
 
-                        <Button :disabled="processing" class="w-full">Save movement</Button>
+                        <Button :disabled="processing" class="w-full">Guardar movimiento</Button>
                     </Form>
                 </CardContent>
             </Card>
@@ -270,36 +270,36 @@ defineOptions({
             <div class="space-y-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Filters</CardTitle>
+                        <CardTitle>Filtros</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div class="grid gap-3 md:grid-cols-4">
                             <div class="grid gap-2">
-                                <Label for="filter-month">Month</Label>
+                                <Label for="filter-month">Mes</Label>
                                 <Input id="filter-month" v-model="filterForm.month" type="month" />
                             </div>
                             <div class="grid gap-2">
-                                <Label for="filter-account">Account</Label>
+                                <Label for="filter-account">Cuenta</Label>
                                 <select id="filter-account" v-model="filterForm.account_id" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                    <option value="">All accounts</option>
+                                    <option value="">Todas las cuentas</option>
                                     <option v-for="account in accounts" :key="account.id" :value="String(account.id)">
                                         {{ account.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="grid gap-2">
-                                <Label for="filter-category">Category</Label>
+                                <Label for="filter-category">Categoria</Label>
                                 <select id="filter-category" v-model="filterForm.category_id" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                    <option value="">All categories</option>
+                                    <option value="">Todas las categorias</option>
                                     <option v-for="category in categories" :key="category.id" :value="String(category.id)">
                                         {{ category.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="grid gap-2">
-                                <Label for="filter-type">Type</Label>
+                                <Label for="filter-type">Tipo</Label>
                                 <select id="filter-type" v-model="filterForm.type" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                    <option value="">All types</option>
+                                    <option value="">Todos los tipos</option>
                                     <option v-for="type in transactionTypes" :key="type.value" :value="type.value">
                                         {{ type.label }}
                                     </option>
@@ -308,7 +308,7 @@ defineOptions({
                         </div>
 
                         <div class="mt-4 flex gap-2">
-                            <Button @click="applyFilters" type="button">Apply filters</Button>
+                            <Button @click="applyFilters" type="button">Aplicar filtros</Button>
                             <Button
                                 @click="
                                     filterForm.month = new Date().toISOString().slice(0, 7);
@@ -320,7 +320,7 @@ defineOptions({
                                 type="button"
                                 variant="outline"
                             >
-                                Reset
+                                Limpiar
                             </Button>
                         </div>
                     </CardContent>
@@ -328,7 +328,7 @@ defineOptions({
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Recorded movements</CardTitle>
+                        <CardTitle>Movimientos registrados</CardTitle>
                         <CardDescription>
                             {{ filters.month }}
                         </CardDescription>
@@ -344,7 +344,7 @@ defineOptions({
                                     <div class="flex items-center gap-2">
                                         <p class="font-medium">{{ transaction.description }}</p>
                                         <Badge variant="secondary">{{ transaction.typeLabel }}</Badge>
-                                        <Badge v-if="transaction.hasAttachment" variant="outline">Attachment</Badge>
+                                        <Badge v-if="transaction.hasAttachment" variant="outline">Adjunto</Badge>
                                     </div>
                                     <p class="text-sm text-muted-foreground">
                                         {{ transaction.accountName }}
@@ -372,7 +372,7 @@ defineOptions({
                         </div>
 
                         <p v-if="transactions.length === 0" class="py-8 text-center text-sm text-muted-foreground">
-                            No transactions match the current filters.
+                            Ningun movimiento coincide con los filtros actuales.
                         </p>
                     </CardContent>
                 </Card>

@@ -31,7 +31,7 @@ defineOptions({
     layout: (page: { currentTeam?: Team | null }) => ({
         breadcrumbs: [
             {
-                title: 'Categories',
+                title: 'Categorias',
                 href: page.currentTeam ? index({ current_team: page.currentTeam.slug }) : '/',
             },
         ],
@@ -40,20 +40,20 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Categories" />
+    <Head title="Categorias" />
 
     <div class="space-y-6 px-4 py-6">
         <Heading
-            title="Categories"
-            description="System categories stay read-only; your custom categories live in the current workspace"
+            title="Categorias"
+            description="Las categorias del sistema son de solo lectura; tus categorias personalizadas viven en el espacio actual"
         />
 
         <div class="grid gap-6 xl:grid-cols-[360px_1fr]">
             <Card class="h-fit">
                 <CardHeader>
-                    <CardTitle>Create category</CardTitle>
+                    <CardTitle>Crear categoria</CardTitle>
                     <CardDescription>
-                        Use categories to keep budgets and transaction insights meaningful.
+                        Usa categorias para que los presupuestos y los movimientos tengan contexto.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -63,15 +63,15 @@ defineOptions({
                         v-slot="{ errors, processing }"
                     >
                         <div class="grid gap-2">
-                            <Label for="category-name">Name</Label>
-                            <Input id="category-name" name="name" placeholder="Dining out" />
+                            <Label for="category-name">Nombre</Label>
+                            <Input id="category-name" name="name" placeholder="Comer fuera" />
                             <InputError :message="errors.name" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="category-type">Type</Label>
+                            <Label for="category-type">Tipo</Label>
                             <select id="category-type" name="type" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                <option value="" disabled selected>Select a type</option>
+                                <option value="" disabled selected>Selecciona un tipo</option>
                                 <option v-for="type in categoryTypes" :key="type.value" :value="type.value">
                                     {{ type.label }}
                                 </option>
@@ -80,9 +80,9 @@ defineOptions({
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="category-parent">Parent category</Label>
+                            <Label for="category-parent">Categoria padre</Label>
                             <select id="category-parent" name="parent_id" class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                <option value="">No parent</option>
+                                <option value="">Sin padre</option>
                                 <option
                                     v-for="category in categories"
                                     :key="category.id"
@@ -96,7 +96,7 @@ defineOptions({
 
                         <div class="grid gap-3 md:grid-cols-2">
                             <div class="grid gap-2">
-                                <Label for="category-icon">Icon</Label>
+                                <Label for="category-icon">Icono</Label>
                                 <Input id="category-icon" name="icon" placeholder="wallet" />
                             </div>
 
@@ -106,7 +106,7 @@ defineOptions({
                             </div>
                         </div>
 
-                        <Button :disabled="processing" class="w-full">Save category</Button>
+                        <Button :disabled="processing" class="w-full">Guardar categoria</Button>
                     </Form>
                 </CardContent>
             </Card>
@@ -119,18 +119,18 @@ defineOptions({
                                 <CardTitle class="text-lg">{{ category.name }}</CardTitle>
                                 <CardDescription>
                                     {{ category.typeLabel }}
-                                    <span v-if="category.parentName"> · child of {{ category.parentName }}</span>
+                                    <span v-if="category.parentName"> · hija de {{ category.parentName }}</span>
                                 </CardDescription>
                             </div>
 
                             <Badge :variant="category.isSystem ? 'secondary' : 'outline'">
-                                {{ category.isSystem ? 'System' : 'Custom' }}
+                                {{ category.isSystem ? 'Sistema' : 'Personalizada' }}
                             </Badge>
                         </div>
                     </CardHeader>
 
                     <CardContent v-if="category.isSystem" class="text-sm text-muted-foreground">
-                        This category is provided by ClariFi and cannot be edited from the workspace UI.
+                        Esta categoria la provee ClariFi y no puede editarse desde la interfaz del espacio.
                     </CardContent>
 
                     <CardContent v-else>
@@ -141,13 +141,13 @@ defineOptions({
                         >
                             <div class="grid gap-3 md:grid-cols-2">
                                 <div class="grid gap-2">
-                                    <Label :for="`category-name-${category.id}`">Name</Label>
+                                    <Label :for="`category-name-${category.id}`">Nombre</Label>
                                     <Input :id="`category-name-${category.id}`" name="name" :default-value="category.name" />
                                     <InputError :message="errors.name" />
                                 </div>
 
                                 <div class="grid gap-2">
-                                    <Label :for="`category-type-${category.id}`">Type</Label>
+                                    <Label :for="`category-type-${category.id}`">Tipo</Label>
                                     <select
                                         :id="`category-type-${category.id}`"
                                         name="type"
@@ -163,13 +163,13 @@ defineOptions({
 
                             <div class="grid gap-3 md:grid-cols-3">
                                 <div class="grid gap-2">
-                                    <Label :for="`category-parent-${category.id}`">Parent</Label>
+                                    <Label :for="`category-parent-${category.id}`">Padre</Label>
                                     <select
                                         :id="`category-parent-${category.id}`"
                                         name="parent_id"
                                         class="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                                     >
-                                        <option value="">No parent</option>
+                                        <option value="">Sin padre</option>
                                         <option
                                             v-for="parent in categories.filter((item) => !item.isSystem && item.id !== category.id)"
                                             :key="parent.id"
@@ -182,7 +182,7 @@ defineOptions({
                                 </div>
 
                                 <div class="grid gap-2">
-                                    <Label :for="`category-icon-${category.id}`">Icon</Label>
+                                    <Label :for="`category-icon-${category.id}`">Icono</Label>
                                     <Input :id="`category-icon-${category.id}`" name="icon" :default-value="category.icon ?? ''" />
                                 </div>
 
@@ -192,7 +192,7 @@ defineOptions({
                                 </div>
                             </div>
 
-                            <Button :disabled="processing" size="sm">Update</Button>
+                            <Button :disabled="processing" size="sm">Actualizar</Button>
                         </Form>
                     </CardContent>
                 </Card>

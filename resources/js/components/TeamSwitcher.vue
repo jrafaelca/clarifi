@@ -119,7 +119,7 @@ onUnmounted(() => {
                                 : 'truncate font-semibold'
                         "
                     >
-                        {{ currentTeam?.name ?? 'Select team' }}
+                        {{ currentTeam?.name ?? 'Selecciona un equipo' }}
                     </span>
                 </div>
                 <ChevronsUpDown
@@ -139,7 +139,7 @@ onUnmounted(() => {
             :side-offset="props.inHeader ? undefined : 4"
         >
             <DropdownMenuLabel class="text-xs text-muted-foreground">
-                Teams
+                Equipos
             </DropdownMenuLabel>
             <DropdownMenuItem
                 v-for="team in teams"
@@ -162,7 +162,7 @@ onUnmounted(() => {
                     @select.prevent
                 >
                     <Plus :class="plusIconClass" />
-                    <span class="text-muted-foreground">New team</span>
+                    <span class="text-muted-foreground">Nuevo equipo</span>
                 </DropdownMenuItem>
             </CreateTeamModal>
         </DropdownMenuContent>

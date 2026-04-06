@@ -40,37 +40,37 @@ const dashboardUrl = computed(() =>
 
 const mainNavItems = computed<NavItem[]>(() => [
     {
-        title: 'Dashboard',
+        title: 'Resumen',
         href: dashboardUrl.value,
         icon: LayoutGrid,
     },
     {
-        title: 'Accounts',
+        title: 'Cuentas',
         href: currentTeam.value ? accounts({ current_team: currentTeam.value.slug }).url : '#',
         icon: Landmark,
     },
     {
-        title: 'Transactions',
+        title: 'Movimientos',
         href: currentTeam.value ? transactions({ current_team: currentTeam.value.slug }).url : '#',
         icon: ArrowRightLeft,
     },
     {
-        title: 'Budgets',
+        title: 'Presupuestos',
         href: currentTeam.value ? budgets({ current_team: currentTeam.value.slug }).url : '#',
         icon: PiggyBank,
     },
     {
-        title: 'Goals',
+        title: 'Metas',
         href: currentTeam.value ? goals({ current_team: currentTeam.value.slug }).url : '#',
         icon: Target,
     },
     {
-        title: 'Debts',
+        title: 'Deudas',
         href: currentTeam.value ? debts({ current_team: currentTeam.value.slug }).url : '#',
         icon: BadgeDollarSign,
     },
     {
-        title: 'Chat',
+        title: 'Asistente',
         href: currentTeam.value ? chat({ current_team: currentTeam.value.slug }).url : '#',
         icon: MessageSquare,
     },

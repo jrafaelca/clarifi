@@ -42,11 +42,12 @@ onMounted(async () => {
     <Card class="w-full">
         <CardHeader>
             <CardTitle class="flex gap-3">
-                <LockKeyhole class="size-4" />2FA recovery codes
+                <LockKeyhole class="size-4" />Codigos de recuperacion 2FA
             </CardTitle>
             <CardDescription>
-                Recovery codes let you regain access if you lose your 2FA
-                device. Store them in a secure password manager.
+                Los codigos de recuperacion te permiten volver a entrar si
+                pierdes tu dispositivo 2FA. Guardalos en un gestor de
+                contrasenas seguro.
             </CardDescription>
         </CardHeader>
         <CardContent>
@@ -58,8 +59,8 @@ onMounted(async () => {
                         :is="isRecoveryCodesVisible ? EyeOff : Eye"
                         class="size-4"
                     />
-                    {{ isRecoveryCodesVisible ? 'Hide' : 'View' }} recovery
-                    codes
+                    {{ isRecoveryCodesVisible ? 'Ocultar' : 'Ver' }} codigos de
+                    recuperacion
                 </Button>
 
                 <Form
@@ -75,7 +76,7 @@ onMounted(async () => {
                         type="submit"
                         :disabled="processing"
                     >
-                        <RefreshCw /> Regenerate codes
+                        <RefreshCw /> Regenerar codigos
                     </Button>
                 </Form>
             </div>
@@ -111,10 +112,10 @@ onMounted(async () => {
                         </div>
                     </div>
                     <p class="text-xs text-muted-foreground select-none">
-                        Each recovery code can be used once to access your
-                        account and will be removed after use. If you need more,
-                        click
-                        <span class="font-bold">Regenerate codes</span> above.
+                        Cada codigo de recuperacion puede usarse una sola vez
+                        para acceder a tu cuenta y se eliminara despues de
+                        usarlo. Si necesitas mas, haz clic en
+                        <span class="font-bold">Regenerar codigos</span>.
                     </p>
                 </div>
             </div>

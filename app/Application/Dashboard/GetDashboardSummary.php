@@ -93,7 +93,7 @@ class GetDashboardSummary
             'workspace' => [
                 'name' => $team->name,
                 'currency' => $team->currency,
-                'month' => $monthStart->format('F Y'),
+                'month' => ucfirst($monthStart->locale('es_CL')->translatedFormat('F Y')),
             ],
             'metrics' => [
                 'totalBalance' => $totalBalance,
@@ -121,14 +121,14 @@ class GetDashboardSummary
                 'name' => $goal->name,
                 'currentAmount' => $goal->current_amount,
                 'targetAmount' => $goal->target_amount,
-                'status' => $goal->status->value,
+                'status' => $goal->status->label(),
             ])->values(),
             'debts' => $debts->map(fn (Debt $debt) => [
                 'id' => $debt->id,
                 'name' => $debt->name,
                 'currentBalance' => $debt->current_balance,
                 'minimumPayment' => $debt->minimum_payment,
-                'status' => $debt->status->value,
+                'status' => $debt->status->label(),
                 'dueDate' => $debt->due_date?->toDateString(),
             ])->values(),
             'latestTransactions' => $latestTransactions->map(fn (Transaction $transaction) => [
