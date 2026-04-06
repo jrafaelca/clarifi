@@ -2,7 +2,7 @@
 
 namespace App\Ai\Pipelines;
 
-use App\Ai\Schemas\ImportExtractionSchema;
+use App\Ai\Agents\FinanceImportAgent;
 use App\Ai\Support\TeamAiProviderFactory;
 use App\Domain\Accounts\Models\Account;
 use App\Domain\Categories\Models\Category;
@@ -21,8 +21,6 @@ use Laravel\Ai\Files\Image;
 use Laravel\Ai\Prompts\AgentPrompt;
 use RuntimeException;
 use Throwable;
-
-use function Laravel\Ai\agent;
 
 class FinanceImportPipeline
 {
@@ -144,10 +142,7 @@ class FinanceImportPipeline
     {
         $csvPreview = $this->csvPreview($batch->files);
 
-        $structuredAgent = agent(
-            instructions: $this->instructions($batch, $csvPreview),
-            schema: fn ($schema) => ImportExtractionSchema::definition($schema),
-        );
+        $structuredAgent = new FinanceImportAgent($batch->team);
 
         $provider = $this->teamAiProviderFactory->forAgent($structuredAgent, $batch->team);
         $attachments = $this->aiAttachments($batch->files);
@@ -402,48 +397,6 @@ class FinanceImportPipeline
             ->values();
 
         return $previews->implode("\n\n");
-    }
-
-    protected function instructions(IngestionBatch $batch, string $csvPreview): string
-    {
-        $today = now()->toDateString();
-        $hasCsvPreview = $csvPreview !== '' ? 'yes' : 'no';
-        $accounts = Account::query()
-            ->forTeam($batch->team)
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Account $account) => "{$account->name} ({$account->type->value})")
-            ->implode(', ');
-
-        $categories = Category::query()
-            ->where(function ($query) use ($batch) {
-                $query->whereNull('team_id')
-                    ->orWhere('team_id', $batch->team_id);
-            })
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Category $category) => "{$category->name} ({$category->type->value})")
-            ->implode(', ');
-
-        return <<<PROMPT
-You extract draft personal-finance records for ClariFi.
-
-Workspace: {$batch->team->name}
-Workspace currency: {$batch->team->currency}
-Today: {$today}
-Existing accounts: {$accounts}
-Existing categories: {$categories}
-CSV preview included: {$hasCsvPreview}
-
-Rules:
-- Return only draft-safe suggestions for accounts, categories, and transactions.
-- Do not invent multi-currency conversions. Use {$batch->team->currency} when currency is not explicit.
-- Prefer matching existing accounts and categories by exact meaning.
-- If an account or category is unknown, include it as a suggestion instead of forcing a bad match.
-- Transactions must be income or expense only.
-- Return dates in YYYY-MM-DD format.
-- Keep the summary concise and practical.
-PROMPT;
     }
 
     /**

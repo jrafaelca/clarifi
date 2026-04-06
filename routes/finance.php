@@ -45,6 +45,7 @@ Route::post('debts/{debt}/payments', [DebtPaymentController::class, 'store'])->n
 
 Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
 Route::post('chat/messages', [ChatController::class, 'store'])->name('chat.messages.store');
+Route::post('chat/messages/stream', [ChatController::class, 'stream'])->name('chat.messages.stream');
 Route::get('chat/ingestion-batches/{ingestionBatch}', [IngestionBatchController::class, 'show'])->name('chat.ingestion-batches.show');
 Route::post('chat/ingestion-batches/{ingestionBatch}/approve-all', [IngestionBatchController::class, 'approveAll'])->name('chat.ingestion-batches.approve-all');
 Route::patch('chat/ingestion-suggestions/{ingestionSuggestion}', [IngestionSuggestionController::class, 'update'])->name('chat.ingestion-suggestions.update');

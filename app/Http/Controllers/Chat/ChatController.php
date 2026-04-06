@@ -9,7 +9,9 @@ use App\Ai\Support\TeamAiProviderFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Chat\StoreChatMessageRequest;
 use App\Models\Ai\IngestionBatch;
+use App\Models\Team;
 use App\Models\User;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -20,9 +22,17 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Ai\Contracts\ConversationStore;
 use Laravel\Ai\Prompts\AgentPrompt;
+use Laravel\Ai\Responses\AgentResponse;
+use Laravel\Ai\Responses\StreamableAgentResponse;
+use Laravel\Ai\Responses\StreamedAgentResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ChatController extends Controller
 {
+    public function __construct(
+        protected TeamAiProviderFactory $teamAiProviderFactory,
+    ) {}
+
     /**
      * Display the chat page.
      */
@@ -61,23 +71,9 @@ class ChatController extends Controller
     public function store(
         StoreChatMessageRequest $request,
         FinanceImportPipeline $financeImportPipeline,
-        TeamAiProviderFactory $teamAiProviderFactory,
         ConversationStore $conversationStore,
     ): JsonResponse {
-        /** @var User $user */
-        $user = $request->user();
-        $team = $user->currentTeam()->firstOrFail();
-
-        if (! $team->hasAiConfiguration()) {
-            return response()->json([
-                'message' => 'La IA todavia no esta configurada para este espacio de trabajo.',
-            ], 503);
-        }
-
-        $prompt = trim((string) $request->validated('prompt', ''));
-        /** @var array<int, UploadedFile> $attachments */
-        $attachments = $request->file('attachments', []);
-        $conversationId = $request->validated('conversation_id');
+        [$user, $team, $prompt, $attachments, $conversationId] = $this->validatedChatContext($request);
 
         if ($financeImportPipeline->shouldUseImportFlow($prompt, $attachments)) {
             $conversationId ??= $conversationStore->storeConversation(
@@ -95,53 +91,27 @@ class ChatController extends Controller
 
             return response()->json([
                 'conversationId' => $conversationId,
-                'userMessage' => [
-                    'id' => null,
-                    'role' => 'user',
-                    'content' => $prompt !== '' ? $prompt : 'Adjunte archivos para procesar.',
-                    'toolCalls' => [],
-                ],
-                'assistantMessage' => [
-                    'id' => (string) Str::uuid(),
-                    'role' => 'assistant',
-                    'content' => 'Estoy procesando la informacion y voy a dejar todo en borrador para tu revision.',
-                    'toolCalls' => [],
-                ],
+                'userMessage' => $this->userMessage(
+                    $prompt !== '' ? $prompt : 'Adjunte archivos para procesar.',
+                ),
+                'assistantMessage' => $this->assistantMessage(
+                    (string) Str::uuid(),
+                    'Estoy procesando la informacion y voy a dejar todo en borrador para tu revision.',
+                    [],
+                ),
                 'batch' => ChatIngestionSummarySchema::fromBatch($batch),
             ]);
         }
 
-        $agent = new FinanceAssistantAgent($user, $team);
-
-        if (filled($conversationId) && $this->conversationExists($conversationId, $user)) {
-            $agent->continue($conversationId, as: $user);
-        } else {
-            $agent->forUser($user);
-        }
-
-        $provider = $teamAiProviderFactory->forAgent($agent, $team);
-        $response = $provider->prompt(new AgentPrompt(
-            $agent,
-            $prompt,
-            [],
-            $provider,
-            $team->ai_model,
-            60,
-        ));
+        $response = $this->promptAssistant($user, $team, $prompt, $conversationId);
 
         return response()->json([
             'conversationId' => $response->conversationId,
-            'userMessage' => [
-                'id' => null,
-                'role' => 'user',
-                'content' => $prompt,
-                'toolCalls' => [],
-            ],
-            'assistantMessage' => [
-                'id' => $response->invocationId,
-                'role' => 'assistant',
-                'content' => $response->text,
-                'toolCalls' => $response->toolCalls
+            'userMessage' => $this->userMessage($prompt),
+            'assistantMessage' => $this->assistantMessage(
+                $response->invocationId,
+                $response->text,
+                $response->toolCalls
                     ->map(fn ($toolCall) => [
                         'id' => $toolCall->id,
                         'name' => $toolCall->name,
@@ -149,14 +119,80 @@ class ChatController extends Controller
                     ])
                     ->values()
                     ->all(),
-            ],
+            ),
+        ]);
+    }
+
+    /**
+     * Stream a chat message response for read-only assistant prompts.
+     */
+    public function stream(
+        StoreChatMessageRequest $request,
+        FinanceImportPipeline $financeImportPipeline,
+    ): JsonResponse|StreamedResponse {
+        [$user, $team, $prompt, $attachments, $conversationId] = $this->validatedChatContext($request);
+
+        if ($financeImportPipeline->shouldUseImportFlow($prompt, $attachments)) {
+            return response()->json([
+                'message' => 'Este mensaje debe procesarse como ingesta asistida.',
+                'shouldFallbackToImport' => true,
+            ], 409);
+        }
+
+        $stream = $this->streamAssistant($user, $team, $prompt, $conversationId);
+        $finalResponse = null;
+
+        $stream->then(function (StreamedAgentResponse $response) use (&$finalResponse): void {
+            $finalResponse = $response;
+        });
+
+        return response()->stream(function () use ($stream, &$finalResponse): void {
+            foreach ($stream as $event) {
+                echo $this->ssePayload([
+                    'type' => 'stream_event',
+                    'event' => $event->toArray(),
+                ]);
+
+                if (function_exists('ob_flush')) {
+                    @ob_flush();
+                }
+
+                flush();
+            }
+
+            $assistantMessage = $finalResponse instanceof StreamedAgentResponse
+                ? $this->assistantMessage(
+                    $finalResponse->invocationId,
+                    $finalResponse->text,
+                    $finalResponse->toolCalls
+                        ->map(fn ($toolCall) => [
+                            'id' => $toolCall->id,
+                            'name' => $toolCall->name,
+                            'arguments' => $toolCall->arguments,
+                        ])
+                        ->values()
+                        ->all(),
+                )
+                : null;
+
+            echo $this->ssePayload([
+                'type' => 'final_message',
+                'conversationId' => $finalResponse?->conversationId ?? $stream->conversationId,
+                'assistantMessage' => $assistantMessage,
+            ]);
+
+            echo "data: [DONE]\n\n";
+        }, 200, [
+            'Cache-Control' => 'no-cache',
+            'Content-Type' => 'text/event-stream',
+            'X-Accel-Buffering' => 'no',
         ]);
     }
 
     /**
      * Get the latest chat conversation id for the given user.
      */
-    protected function latestConversationId(User $user, $team): ?string
+    protected function latestConversationId(User $user, Team $team): ?string
     {
         $latestMessage = DB::table('agent_conversation_messages')
             ->where('user_id', $user->id)
@@ -221,7 +257,7 @@ class ChatController extends Controller
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function conversationBatches(?string $conversationId, User $user, $team): array
+    protected function conversationBatches(?string $conversationId, User $user, Team $team): array
     {
         if (blank($conversationId)) {
             return [];
@@ -239,11 +275,136 @@ class ChatController extends Controller
             ->all();
     }
 
+    /**
+     * Determine whether a conversation belongs to the current user.
+     */
     protected function conversationExists(string $conversationId, User $user): bool
     {
         return DB::table('agent_conversations')
             ->where('id', $conversationId)
             ->where('user_id', $user->id)
             ->exists();
+    }
+
+    /**
+     * Validate and normalize the current chat request context.
+     *
+     * @return array{0: User, 1: Team, 2: string, 3: array<int, UploadedFile>, 4: ?string}
+     */
+    protected function validatedChatContext(StoreChatMessageRequest $request): array
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $team = $user->currentTeam()->firstOrFail();
+
+        if (! $team->hasAiConfiguration()) {
+            throw new HttpResponseException(response()->json([
+                'message' => 'La IA todavia no esta configurada para este espacio de trabajo.',
+            ], 503));
+        }
+
+        /** @var array<int, UploadedFile> $attachments */
+        $attachments = $request->file('attachments', []);
+
+        return [
+            $user,
+            $team,
+            trim((string) $request->validated('prompt', '')),
+            $attachments,
+            $request->validated('conversation_id'),
+        ];
+    }
+
+    /**
+     * Build an assistant agent configured for the current conversation.
+     */
+    protected function assistantAgent(User $user, Team $team, ?string $conversationId): FinanceAssistantAgent
+    {
+        $agent = new FinanceAssistantAgent($user, $team);
+
+        if (filled($conversationId) && $this->conversationExists($conversationId, $user)) {
+            $agent->continue($conversationId, as: $user);
+        } else {
+            $agent->forUser($user);
+        }
+
+        return $agent;
+    }
+
+    /**
+     * Prompt the assistant synchronously and return the response.
+     */
+    protected function promptAssistant(User $user, Team $team, string $prompt, ?string $conversationId): AgentResponse
+    {
+        $agent = $this->assistantAgent($user, $team, $conversationId);
+        $provider = $this->teamAiProviderFactory->forAgent($agent, $team);
+
+        return $provider->prompt(new AgentPrompt(
+            $agent,
+            $prompt,
+            [],
+            $provider,
+            $team->ai_model,
+            60,
+        ));
+    }
+
+    /**
+     * Stream the assistant response for the given prompt.
+     */
+    protected function streamAssistant(User $user, Team $team, string $prompt, ?string $conversationId): StreamableAgentResponse
+    {
+        $agent = $this->assistantAgent($user, $team, $conversationId);
+        $provider = $this->teamAiProviderFactory->forAgent($agent, $team);
+
+        return $provider->stream(new AgentPrompt(
+            $agent,
+            $prompt,
+            [],
+            $provider,
+            $team->ai_model,
+            60,
+        ));
+    }
+
+    /**
+     * Build a normalized user message payload.
+     *
+     * @return array<string, mixed>
+     */
+    protected function userMessage(string $prompt): array
+    {
+        return [
+            'id' => null,
+            'role' => 'user',
+            'content' => $prompt,
+            'toolCalls' => [],
+        ];
+    }
+
+    /**
+     * Build a normalized assistant message payload.
+     *
+     * @param  array<int, array<string, mixed>>  $toolCalls
+     * @return array<string, mixed>
+     */
+    protected function assistantMessage(string $id, string $content, array $toolCalls): array
+    {
+        return [
+            'id' => $id,
+            'role' => 'assistant',
+            'content' => $content,
+            'toolCalls' => $toolCalls,
+        ];
+    }
+
+    /**
+     * Format an SSE payload frame.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    protected function ssePayload(array $payload): string
+    {
+        return 'data: '.json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n\n";
     }
 }

@@ -74,9 +74,9 @@ class GetRecentTransactionsTool extends WorkspaceReadTool implements Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'limit' => $schema->integer()->min(1)->max(10),
-            'month' => $schema->string(),
-            'type' => $schema->string(),
+            'limit' => $schema->integer()->min(1)->max(10)->required(),
+            'month' => $schema->string()->nullable()->required(),
+            'type' => $schema->string()->nullable()->required(),
         ];
     }
 }

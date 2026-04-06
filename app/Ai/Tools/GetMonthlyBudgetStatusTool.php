@@ -37,7 +37,7 @@ class GetMonthlyBudgetStatusTool extends WorkspaceReadTool implements Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'month' => $schema->string(),
+            'month' => $schema->string()->nullable()->required(),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Middleware\LogAgentPrompt;
 use App\Ai\Prompts\FinanceAssistantInstructions;
 use App\Ai\Tools\GetAccountsSummaryTool;
 use App\Ai\Tools\GetDebtSummaryTool;
@@ -13,13 +14,15 @@ use App\Models\User;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
+use Laravel\Ai\Contracts\HasMiddleware;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-class FinanceAssistantAgent implements Agent, Conversational, HasTools
+class FinanceAssistantAgent implements Agent, Conversational, HasMiddleware, HasProviderOptions, HasTools
 {
     use Promptable, RemembersConversations;
 
@@ -45,6 +48,34 @@ class FinanceAssistantAgent implements Agent, Conversational, HasTools
     }
 
     /**
+     * Get the middleware that should run for the finance assistant.
+     *
+     * @return array<int, object>
+     */
+    public function middleware(): array
+    {
+        return [
+            new LogAgentPrompt,
+        ];
+    }
+
+    /**
+     * Get provider-specific options for the finance assistant.
+     *
+     * @return array<string, mixed>
+     */
+    public function providerOptions(Lab|string $provider): array
+    {
+        if ($provider !== Lab::OpenAI && $provider !== Lab::OpenAI->value) {
+            return [];
+        }
+
+        return [
+            'temperature' => 0.2,
+        ];
+    }
+
+    /**
      * Get the tools available to the agent.
      *
      * @return Tool[]
@@ -66,5 +97,21 @@ class FinanceAssistantAgent implements Agent, Conversational, HasTools
     protected function maxConversationMessages(): int
     {
         return 40;
+    }
+
+    /**
+     * Get the workspace associated with the current agent invocation.
+     */
+    public function team(): Team
+    {
+        return $this->team;
+    }
+
+    /**
+     * Get the user associated with the current agent invocation.
+     */
+    public function user(): User
+    {
+        return $this->user;
     }
 }

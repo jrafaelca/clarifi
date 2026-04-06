@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { index } from '@/routes/chat';
 import { approveAll as approveAllBatch, show as showBatch } from '@/routes/chat/ingestion-batches';
 import { update as updateSuggestion } from '@/routes/chat/ingestion-suggestions';
-import { store as storeMessage } from '@/routes/chat/messages';
+import { store as storeMessage, stream as streamMessage } from '@/routes/chat/messages';
 import { edit as editWorkspace } from '@/routes/workspace';
 import type {
     ChatMessageRecord,
@@ -40,10 +40,21 @@ type Props = {
 type ChatResponsePayload = {
     message?: string;
     errors?: Record<string, string[]>;
+    shouldFallbackToImport?: boolean;
     conversationId?: string | null;
     userMessage?: ChatMessageRecord;
     assistantMessage?: ChatMessageRecord;
     batch?: IngestionBatchRecord;
+};
+
+type ChatStreamEnvelope = {
+    type: 'stream_event' | 'final_message';
+    event?: {
+        type?: string;
+        delta?: string;
+    };
+    conversationId?: string | null;
+    assistantMessage?: ChatMessageRecord | null;
 };
 
 const props = defineProps<Props>();
@@ -96,6 +107,36 @@ const upsertBatch = (batch: IngestionBatchRecord) => {
 const removeSelectedFile = (index: number) => {
     selectedFiles.value.splice(index, 1);
 };
+
+const pushMessage = (message: ChatMessageRecord) => {
+    messages.value.push(message);
+};
+
+const replaceMessage = (messageId: string, nextMessage: ChatMessageRecord) => {
+    const index = messages.value.findIndex((candidate) => candidate.id === messageId);
+
+    if (index === -1) {
+        messages.value.push(nextMessage);
+
+        return;
+    }
+
+    messages.value.splice(index, 1, nextMessage);
+};
+
+const assistantPlaceholder = (messageId: string): ChatMessageRecord => ({
+    id: messageId,
+    role: 'assistant',
+    content: '...',
+    toolCalls: [],
+});
+
+const userMessage = (content: string): ChatMessageRecord => ({
+    id: null,
+    role: 'user',
+    content,
+    toolCalls: [],
+});
 
 const refreshBatch = async (batchId: number) => {
     if (!currentTeam.value) {
@@ -173,6 +214,20 @@ const sendPrompt = async () => {
     errorMessage.value = null;
     fieldErrors.value = {};
 
+    try {
+        if (selectedFiles.value.length > 0) {
+            await sendJsonPrompt();
+        } else {
+            await sendStreamPrompt();
+        }
+    } catch {
+        errorMessage.value = 'Un error de red interrumpio la operacion del asistente.';
+    } finally {
+        isSending.value = false;
+    }
+};
+
+const buildChatForm = () => {
     const form = new FormData();
 
     if (prompt.value.trim()) {
@@ -185,50 +240,158 @@ const sendPrompt = async () => {
 
     selectedFiles.value.forEach((file) => form.append('attachments[]', file));
 
-    try {
-        const response = await fetch(
-            storeMessage({ current_team: currentTeam.value.slug }).url,
-            {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrfToken ?? '',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: form,
-            },
-        );
+    return form;
+};
 
+const sendJsonPrompt = async () => {
+    if (!currentTeam.value) {
+        return;
+    }
+
+    const response = await fetch(
+        storeMessage({ current_team: currentTeam.value.slug }).url,
+        {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrfToken ?? '',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: buildChatForm(),
+        },
+    );
+
+    const payload = (await response.json()) as ChatResponsePayload;
+
+    if (!response.ok) {
+        fieldErrors.value = {
+            prompt: payload.errors?.prompt?.[0],
+            attachments: payload.errors?.attachments?.[0] ?? payload.errors?.['attachments.0']?.[0],
+        };
+        errorMessage.value = payload.message ?? 'El asistente no pudo responder en este momento.';
+
+        return;
+    }
+
+    if (payload.userMessage) {
+        pushMessage(payload.userMessage);
+    }
+
+    if (payload.assistantMessage) {
+        pushMessage(payload.assistantMessage);
+    }
+
+    if (payload.batch) {
+        upsertBatch(payload.batch);
+    }
+
+    conversationId.value = payload.conversationId ?? null;
+    resetComposer();
+};
+
+const sendStreamPrompt = async () => {
+    if (!currentTeam.value) {
+        return;
+    }
+
+    const response = await fetch(
+        streamMessage({ current_team: currentTeam.value.slug }).url,
+        {
+            method: 'POST',
+            headers: {
+                Accept: 'text/event-stream',
+                'X-CSRF-TOKEN': csrfToken ?? '',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: buildChatForm(),
+        },
+    );
+
+    if (!response.ok) {
         const payload = (await response.json()) as ChatResponsePayload;
 
-        if (!response.ok) {
-            fieldErrors.value = {
-                prompt: payload.errors?.prompt?.[0],
-                attachments: payload.errors?.attachments?.[0] ?? payload.errors?.['attachments.0']?.[0],
-            };
-            errorMessage.value = payload.message ?? 'El asistente no pudo responder en este momento.';
+        if (payload.shouldFallbackToImport) {
+            await sendJsonPrompt();
 
             return;
         }
 
-        if (payload.userMessage) {
-            messages.value.push(payload.userMessage);
+        fieldErrors.value = {
+            prompt: payload.errors?.prompt?.[0],
+            attachments: payload.errors?.attachments?.[0] ?? payload.errors?.['attachments.0']?.[0],
+        };
+        errorMessage.value = payload.message ?? 'El asistente no pudo responder en este momento.';
+
+        return;
+    }
+
+    const currentPrompt = prompt.value.trim();
+    const streamingMessageId = `streaming-${Date.now()}`;
+
+    pushMessage(userMessage(currentPrompt));
+    pushMessage(assistantPlaceholder(streamingMessageId));
+    resetComposer();
+
+    const reader = response.body?.getReader();
+
+    if (!reader) {
+        errorMessage.value = 'El navegador no pudo abrir el stream del asistente.';
+
+        return;
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let streamedContent = '';
+
+    while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+            break;
         }
 
-        if (payload.assistantMessage) {
-            messages.value.push(payload.assistantMessage);
-        }
+        buffer += decoder.decode(value, { stream: true });
 
-        if (payload.batch) {
-            upsertBatch(payload.batch);
-        }
+        const frames = buffer.split('\n\n');
+        buffer = frames.pop() ?? '';
 
-        conversationId.value = payload.conversationId ?? null;
-        resetComposer();
-    } catch {
-        errorMessage.value = 'Un error de red interrumpio la operacion del asistente.';
-    } finally {
-        isSending.value = false;
+        for (const frame of frames) {
+            const dataLine = frame
+                .split('\n')
+                .find((line) => line.startsWith('data: '));
+
+            if (!dataLine) {
+                continue;
+            }
+
+            const rawPayload = dataLine.slice(6);
+
+            if (rawPayload === '[DONE]') {
+                continue;
+            }
+
+            const payload = JSON.parse(rawPayload) as ChatStreamEnvelope;
+
+            if (payload.type === 'stream_event' && payload.event?.type === 'text_delta') {
+                streamedContent += payload.event.delta ?? '';
+
+                replaceMessage(streamingMessageId, {
+                    id: streamingMessageId,
+                    role: 'assistant',
+                    content: streamedContent === '' ? '...' : streamedContent,
+                    toolCalls: [],
+                });
+            }
+
+            if (payload.type === 'final_message') {
+                conversationId.value = payload.conversationId ?? conversationId.value;
+
+                if (payload.assistantMessage) {
+                    replaceMessage(streamingMessageId, payload.assistantMessage);
+                }
+            }
+        }
     }
 };
 

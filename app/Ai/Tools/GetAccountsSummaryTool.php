@@ -64,7 +64,7 @@ class GetAccountsSummaryTool extends WorkspaceReadTool implements Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'include_inactive' => $schema->boolean(),
+            'include_inactive' => $schema->boolean()->required(),
         ];
     }
 }
