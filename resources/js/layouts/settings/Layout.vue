@@ -8,14 +8,9 @@ import { toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editProfile } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
-import { edit as editWorkspace } from '@/routes/workspace';
 import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Workspace',
-        href: editWorkspace(),
-    },
     {
         title: 'Profile',
         href: editProfile(),

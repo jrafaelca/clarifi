@@ -201,10 +201,6 @@ const mainNavItems = computed<NavItem[]>(() => [
                 </div>
 
                 <div class="ml-auto flex items-center space-x-2">
-                    <div v-if="currentTeam" class="hidden rounded-full border px-3 py-1 text-xs text-muted-foreground sm:block">
-                        {{ currentTeam.name }} · {{ currentTeam.currency }}
-                    </div>
-
                     <DropdownMenu>
                         <DropdownMenuTrigger :as-child="true">
                             <Button
