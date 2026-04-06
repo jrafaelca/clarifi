@@ -21,6 +21,7 @@ declare module '@inertiajs/core' {
             auth: Auth;
             sidebarOpen: boolean;
             currentTeam: Team | null;
+            workspace: Team | null;
             teams: Team[];
             [key: string]: unknown;
         };

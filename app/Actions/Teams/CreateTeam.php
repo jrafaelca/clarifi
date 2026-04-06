@@ -17,6 +17,7 @@ class CreateTeam
         return DB::transaction(function () use ($user, $name, $isPersonal) {
             $team = Team::create([
                 'name' => $name,
+                'currency' => config('clarifi.default_currency'),
                 'is_personal' => $isPersonal,
             ]);
 

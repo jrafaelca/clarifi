@@ -23,6 +23,7 @@ class TeamFactory extends Factory
         return [
             'name' => $name,
             'slug' => Str::slug($name),
+            'currency' => config('clarifi.default_currency'),
             'is_personal' => false,
         ];
     }

@@ -153,6 +153,7 @@ trait HasTeams
             id: $team->id,
             name: $team->name,
             slug: $team->slug,
+            currency: $team->currency,
             isPersonal: $team->is_personal,
             role: $role?->value,
             roleLabel: $role?->label(),
